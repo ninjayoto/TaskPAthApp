@@ -42,8 +42,11 @@ public class TaskProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        // insert additional columns here after adding them to the database
-        return database.query(TaskDataHelper.TABLE, TaskDataHelper.ALL_COLUMNS,selection, null, null, null,  TaskDataHelper.TASK_CREATED + " DESC");
+        /* insert additional columns here too if you are adding them to the database
+        The last parameter we're passing is the ID in DEC order, to display the last added task at the top
+         */
+
+        return database.query(TaskDataHelper.TABLE, TaskDataHelper.ALL_COLUMNS,selection, null, null, null,  TaskDataHelper.TASK_ID + " DESC");
     }
 
     @Nullable

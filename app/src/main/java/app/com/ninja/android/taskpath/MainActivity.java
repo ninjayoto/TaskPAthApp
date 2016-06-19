@@ -1,3 +1,15 @@
+/*
+created by Ninjayoto:
+
+TODO
+Implement DialogFragment to replace current current dialgs
+Implement due date with a date picker
+Support for selecting priority
+
+Improve Style and UI:
+Create custom list items
+ */
+
 package app.com.ninja.android.taskpath;
 
 import android.app.LoaderManager;
@@ -59,9 +71,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
                                            int pos, long id) {
+
                 Toast.makeText(getApplicationContext(), "long clicked" + String.valueOf(pos+1), Toast.LENGTH_SHORT).show();
                 Log.v("long clicked", "pos: " + (pos + 1));
-
+                openEditDeleteDialog();
                 return true;
             }
         });
@@ -89,6 +102,26 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     }
 
+    private void openEditDeleteDialog() {
+
+        final String[] actions = {"Edit", "Delete"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Pick an Action");
+        builder.setItems(actions, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+                // Edit method
+
+                //Delete method
+
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
+
+    }
+
+
     private void fireAddTaskDialog() {
         final EditText addTask = new EditText(this);
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -114,8 +147,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 getContentResolver().insert(TaskProvider.CONTENT_URI, values);
 
         restartLoader();
-        Toast.makeText(this, task + " added!", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "To edit or delete Long press a task", Toast.LENGTH_LONG).show();
     }
+
+
 
     private void restartLoader(){
         getLoaderManager().restartLoader(0,null, this);
@@ -150,33 +185,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         return super.onOptionsItemSelected(item);
     }
-
-//    private AlertDialog showCustomDialog(final Activity act,
-//                                         CharSequence title,
-//                                         CharSequence message,
-//                                         CharSequence buttonYes,
-//                                         CharSequence buttonNo,
-//                                         final int selectedIndex) {
-//        AlertDialog.Builder customDialog = new AlertDialog.Builder(act);
-//        customDialog.setTitle(title);
-//        customDialog.setMessage(message);
-//
-//        //clicking the positive button
-//        customDialog.setPositiveButton(buttonYes, new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialogInterface, int i) {
-//                //Action performed on clicking the positive dialog button action
-//
-//            }
-//        });
-//
-//        //Clicking the negative button
-//        customDialog.setNegativeButton(buttonNo, new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialogInterface, int i) {
-//                //Action performed on clicking the negative dialog button action
-//            }
-//        });
-//        return customDialog.show();
-//    }
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
