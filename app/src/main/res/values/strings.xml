@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Task Path</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_new">Enter a new Task</string>
+</resources>
