@@ -42,6 +42,12 @@ public class TaskProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+
+        //to return a single Task we willcheck if the URI has an id , this means it's for a single task
+        if (uriMatcher.match(uri) == TASKS_ID){
+            selection = TaskDataHelper.TASK_ID + "=" + uri.getLastPathSegment();
+        }
+
         /* insert additional columns here too if you are adding them to the database
         The last parameter we're passing is the ID in DEC order, to display the last added task at the top
          */

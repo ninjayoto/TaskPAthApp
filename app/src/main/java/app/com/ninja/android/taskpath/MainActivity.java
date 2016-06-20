@@ -2,6 +2,7 @@
 created by Ninjayoto:
 
 TODO
+Handle Configuration change
 Implement DialogFragment to replace current current dialgs
 Implement due date with a date picker
 Support for selecting priority
@@ -72,9 +73,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
                                            int pos, long id) {
 
-                Toast.makeText(getApplicationContext(), "long clicked" + String.valueOf(pos+1), Toast.LENGTH_SHORT).show();
-                Log.v("long clicked", "pos: " + (pos + 1));
-                openEditDeleteDialog();
+                Uri uri = Uri.parse(TaskProvider.CONTENT_URI+ "/" +id);
+                String taskFilter = TaskDataHelper.TASK_ID + "=" + uri.getLastPathSegment();
+                Cursor cursor = getContentResolver().query(uri, TaskDataHelper.ALL_COLUMNS, taskFilter, null, null);
+                cursor.moveToFirst();
+                String existTaskText = cursor.getString(cursor.getColumnIndex(TaskDataHelper.COL_TASK_TITLE));
+//                Toast.makeText(getApplicationContext(), "long clicked" + String.valueOf(pos+1), Toast.LENGTH_SHORT).show();
+                Log.d("long clicked", "pos: " + (pos + 1) + " " +  existTaskText);
+
+                openEditDeleteDialog(taskFilter , existTaskText);
                 return true;
             }
         });
@@ -102,23 +109,72 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     }
 
-    private void openEditDeleteDialog() {
+    private void openEditDeleteDialog(String filter, final String oldTask) {
 
         final String[] actions = {"Edit", "Delete"};
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final String editDeleteFilter  = filter;
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("Pick an Action");
         builder.setItems(actions, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
                 // Edit method
+                if (item == 0) {
+
+                    editTask(editDeleteFilter, oldTask);
+                }
 
                 //Delete method
+                if (item==1) {
+
+                    deleteTask(editDeleteFilter);
+                }
 
             }
         });
         AlertDialog alert = builder.create();
         alert.show();
 
+    }
+
+    private void editTask(String filter, String oldTask) {
+        final String editFilter = filter;
+
+
+        final EditText addTask = new EditText(this);
+        addTask.setText(oldTask);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Add a new task")
+                .setMessage("Edit Task")
+                .setView(addTask)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        String task = String.valueOf(addTask.getText());
+                        updateTask(task, editFilter);
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
+        dialog.show();
+
+        }
+
+    private void updateTask(String task, String oldId) {
+        ContentValues values = new ContentValues();
+        values.put(TaskDataHelper.COL_TASK_TITLE, task);
+        getContentResolver().update(TaskProvider.CONTENT_URI, values, oldId, null);
+
+        restartLoader();
+        Toast.makeText(this, "Task updated successfully", Toast.LENGTH_LONG).show();
+    }
+
+
+    private void deleteTask(String filter) {
+        String deleteFilter = filter;
+        getContentResolver().delete(TaskProvider.CONTENT_URI,deleteFilter, null);
+        restartLoader();
+        Toast.makeText(this, "Task Deleted" , Toast.LENGTH_LONG).show();
     }
 
 
@@ -132,7 +188,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String task = String.valueOf(addTask.getText());
+                        if (task.length()!=0){
                         insertTaskToData(task);
+                        }
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -149,7 +207,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         restartLoader();
         Toast.makeText(this, "To edit or delete Long press a task", Toast.LENGTH_LONG).show();
     }
-
 
 
     private void restartLoader(){
