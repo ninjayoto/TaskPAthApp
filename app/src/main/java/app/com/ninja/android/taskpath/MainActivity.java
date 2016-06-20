@@ -3,7 +3,7 @@ created by Ninjayoto:
 
 TODO
 Handle Configuration change
-Implement DialogFragment to replace current current dialgs
+Implement DialogFragment to replace current current dialogs
 Implement due date with a date picker
 Support for selecting priority
 
@@ -25,7 +25,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private CursorAdapter cursorAdapter;
     private static final String TAG = "MainActivity ";
+    String taskFilter;
+    String existTaskText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,15 +59,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         //Get data FROM data table column -> array
         String[] from = {TaskDataHelper.COL_TASK_TITLE};
         //Data TO list items
-        int[] to = {android.R.id.text1};
+        int[] to = {R.id.i_task};
         cursorAdapter = new SimpleCursorAdapter(this,
-                android.R.layout.simple_list_item_1, null, from, to, 0) ;
+                R.layout.task_item, null, from, to, 0) ;
 
 
         lv.setAdapter(cursorAdapter);
         getLoaderManager().initLoader(0, null, this);
 
-//        TextView selection = (TextView) findViewById(R.id.singleTask);
 
         lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -74,23 +74,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                            int pos, long id) {
 
                 Uri uri = Uri.parse(TaskProvider.CONTENT_URI+ "/" +id);
-                String taskFilter = TaskDataHelper.TASK_ID + "=" + uri.getLastPathSegment();
+                taskFilter = TaskDataHelper.TASK_ID + "=" + uri.getLastPathSegment();
                 Cursor cursor = getContentResolver().query(uri, TaskDataHelper.ALL_COLUMNS, taskFilter, null, null);
                 cursor.moveToFirst();
-                String existTaskText = cursor.getString(cursor.getColumnIndex(TaskDataHelper.COL_TASK_TITLE));
-//                Toast.makeText(getApplicationContext(), "long clicked" + String.valueOf(pos+1), Toast.LENGTH_SHORT).show();
-                Log.d("long clicked", "pos: " + (pos + 1) + " " +  existTaskText);
+                existTaskText = cursor.getString(cursor.getColumnIndex(TaskDataHelper.COL_TASK_TITLE));
 
-                openEditDeleteDialog(taskFilter , existTaskText);
+                openEditDeleteDialog();
                 return true;
             }
         });
 
-//        @Override
-//        public void onListItemClick(ListView parent, View v int position, long id){
-//            String text = parent.getItemAtPosition(position).toString();
-//            Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
-//        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
@@ -102,17 +95,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
                 fireAddTaskDialog();
 
-//                showAddDialog();
             }
         });
 
 
     }
 
-    private void openEditDeleteDialog(String filter, final String oldTask) {
+    private void openEditDeleteDialog() {
 
         final String[] actions = {"Edit", "Delete"};
-        final String editDeleteFilter  = filter;
+        //final String editDeleteFilter  = filter;
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("Pick an Action");
         builder.setItems(actions, new DialogInterface.OnClickListener() {
@@ -120,13 +112,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 // Edit method
                 if (item == 0) {
 
-                    editTask(editDeleteFilter, oldTask);
+                    editTask();
                 }
 
                 //Delete method
                 if (item==1) {
 
-                    deleteTask(editDeleteFilter);
+                    deleteTask();
                 }
 
             }
@@ -136,22 +128,20 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     }
 
-    private void editTask(String filter, String oldTask) {
-        final String editFilter = filter;
-
+    private void editTask() {
 
         final EditText addTask = new EditText(this);
-        addTask.setText(oldTask);
+        addTask.setText(existTaskText);
         AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Add a new task")
-                .setMessage("Edit Task")
+                .setTitle("Edit task")
+                .setMessage("Edit an Existing task then tap OK")
                 .setView(addTask)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
                         String task = String.valueOf(addTask.getText());
-                        updateTask(task, editFilter);
+                        updateTask(task);
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -160,19 +150,18 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         }
 
-    private void updateTask(String task, String oldId) {
+    private void updateTask(String task) {
         ContentValues values = new ContentValues();
         values.put(TaskDataHelper.COL_TASK_TITLE, task);
-        getContentResolver().update(TaskProvider.CONTENT_URI, values, oldId, null);
+        getContentResolver().update(TaskProvider.CONTENT_URI, values, taskFilter, null);
 
         restartLoader();
         Toast.makeText(this, "Task updated successfully", Toast.LENGTH_LONG).show();
     }
 
 
-    private void deleteTask(String filter) {
-        String deleteFilter = filter;
-        getContentResolver().delete(TaskProvider.CONTENT_URI,deleteFilter, null);
+    private void deleteTask() {
+        getContentResolver().delete(TaskProvider.CONTENT_URI,taskFilter, null);
         restartLoader();
         Toast.makeText(this, "Task Deleted" , Toast.LENGTH_LONG).show();
     }
@@ -182,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         final EditText addTask = new EditText(this);
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Add a new task")
-                .setMessage("What do you want to do next?")
+                .setMessage("Type in the task and click add")
                 .setView(addTask)
                 .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     @Override
@@ -205,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 getContentResolver().insert(TaskProvider.CONTENT_URI, values);
 
         restartLoader();
-        Toast.makeText(this, "To edit or delete Long press a task", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "To edit or delete long press a task", Toast.LENGTH_LONG).show();
     }
 
 
@@ -213,13 +202,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         getLoaderManager().restartLoader(0,null, this);
     }
 
-///DialogFragment
-
-//    private void showAddDialog() {
-//        FragmentManager fm = getSupportFragmentManager();
-//        AddFragment AddTaskDialogFragment = AddFragment.newInstance("New Task");
-//        AddTaskDialogFragment.show(fm, "fragment_add");
-//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -258,7 +240,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         cursorAdapter.swapCursor(null);
 
     }
-
 
     
     //implemented DialogFragment methods

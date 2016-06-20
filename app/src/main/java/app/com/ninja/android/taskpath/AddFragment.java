@@ -16,17 +16,13 @@ import android.widget.TextView;
 
 
 public class AddFragment extends DialogFragment implements TextView.OnEditorActionListener {
-    // TODO: Rename parameter arguments, choose names that match
+
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "title";
-//    private static final String ARG_PARAM2 = "param2";
+
 
     private EditText mEditText;
 
-
-    // TODO: Rename and change types of parameters
-//    private String mParam1;
-//    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
 
@@ -44,14 +40,6 @@ public class AddFragment extends DialogFragment implements TextView.OnEditorActi
         return fragment;
     }
 
-//    @Override
-//    public void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        if (getArguments() != null) {
-//            mParam1 = getArguments().getString(ARG_PARAM1);
-//            mParam2 = getArguments().getString(ARG_PARAM2);
-//        }
-//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -59,7 +47,6 @@ public class AddFragment extends DialogFragment implements TextView.OnEditorActi
         mEditText.setOnEditorActionListener(this);
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_add, container);
-
 
     }
 
@@ -90,29 +77,6 @@ public class AddFragment extends DialogFragment implements TextView.OnEditorActi
         }
         return false;
     }
-
-
-//    @Override
-//    public Dialog onCreateDialog(Bundle savedInstanceState) {
-//        String title = getArguments().getString("title");
-//        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-//        alertDialogBuilder.setTitle(title);
-//        alertDialogBuilder.setMessage("Are you sure?");
-//        alertDialogBuilder.setPositiveButton("OK",  new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                // on success
-//            }
-//        });
-//        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                dialog.dismiss();
-//            }
-//        });
-//
-//        return alertDialogBuilder.create();
-//    }
 
 
 
